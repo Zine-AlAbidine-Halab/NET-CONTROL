@@ -58,6 +58,25 @@ python3 -m unittest discover -s tests -v
 
 Les tests Python isolés ne valident pas la capture réelle Scapy, la disponibilité de l’interface réseau ni les changements effectifs de pare-feu. Ces points doivent être vérifiés dans une VM Kali dédiée et autorisée.
 
+
+## 🎓 Présentation académique — Tech Workshop 2026
+
+Le **20 juin 2026**, j'ai eu l'occasion de présenter mon projet **NET·CONTROL — Supervision et sécurité des réseaux** lors du **Tech Workshop: Artificial Intelligence & Cybersecurity**, organisé à la Faculté des Sciences d'El Jadida, Université Chouaïb Doukkali.
+
+J'ai réalisé une **démonstration pratique de l'application** devant mes collègues, mes enseignants et des responsables de l'établissement.
+
+Cette expérience m'a permis de présenter les fonctionnalités de NET·CONTROL, d'expliquer son fonctionnement technique et de développer mes compétences en communication scientifique et technique.
+
+**Informations sur l'événement :**
+- **Date :** 20 juin 2026
+- **Lieu :** AU Hall & CED — Faculté des Sciences d'El Jadida, Maroc
+- **Thématiques :** Cybersécurité, intelligence artificielle et science des données
+
+🔗 [Annonce officielle du Tech Workshop](https://www.fs.ucd.ac.ma/tech-workshop-artificial-intelligence-cybersecurity/)
+![Affiche officielle du Tech Workshop 2026](tech-workshop-2026.jpg)
+
+---
+
 ## Limitations
 - Détecteurs fondés sur des règles simples (changement IP/MAC, seuil fixe) : alertes possibles sur trafic légitime
 - Les règles `iptables` ajoutées dans `INPUT` ne remplacent pas un pare-feu réseau de passerelle
