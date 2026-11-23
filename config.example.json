@@ -1,0 +1,20 @@
+{
+    "interface": "eth0",
+    "subnet": "192.168.1.0/24",
+    "detection": {
+        "flood_window_seconds": 5,
+        "flood_packet_threshold": 200,
+        "arp_check_enabled": true
+    },
+    "access_control": {
+        "whitelist": [
+            "192.168.1.1"
+        ],
+        "blacklist": []
+    },
+    "web": {
+        "host": "127.0.0.1",
+        "port": 5000,
+        "refresh_seconds": 3
+    }
+}

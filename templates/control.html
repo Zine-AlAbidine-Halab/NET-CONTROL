@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% set active = "control" %}
+{% block title %}Contrôle{% endblock %}
+
+{% block body %}
+
+{% if not enforcement %}
+<div class="flash">
+    iptables non détecté — les entrées de liste noire sont enregistrées
+    mais non appliquées. Lancez l'application sur Kali Linux avec sudo
+    pour activer le blocage réel.
+</div>
+{% endif %}
+
+<div class="grid grid-2" style="margin-bottom:22px">
+
+    <!-- ------------------- BLACKLIST ------------------- -->
+    <div>
+        <div class="section-title">Liste noire — blocage du trafic</div>
+        <div class="card">
+            <p class="muted" style="margin-bottom:10px">
+                Chaque IP ajoutée est bloquée via une règle iptables DROP.
+            </p>
+            <form class="inline-form" method="POST"
+                  action="{{ url_for('list_action', which='blacklist', action='add') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                <input type="text" name="ip" placeholder="192.168.1.50">
+                <button class="btn red small">Bloquer</button>
+            </form>
+            <div class="spacer"></div>
+            <table>
+                <tr><th>Adresse IP bloquée</th><th></th></tr>
+                {% for ip in blacklist %}
+                <tr>
+                    <td>{{ ip }}</td>
+                    <td style="text-align:right">
+                        <form method="POST"
+                          action="{{ url_for('list_action', which='blacklist', action='remove') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                            <input type="hidden" name="ip" value="{{ ip }}">
+                            <button class="btn small">Débloquer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2" class="muted">Aucune IP bloquée.</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <!-- ------------------- WHITELIST ------------------- -->
+    <div>
+        <div class="section-title">Liste blanche — hôtes de confiance</div>
+        <div class="card">
+            <p class="muted" style="margin-bottom:10px">
+                Les hôtes de confiance ne déclenchent aucune alerte.
+            </p>
+            <form class="inline-form" method="POST"
+                  action="{{ url_for('list_action', which='whitelist', action='add') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                <input type="text" name="ip" placeholder="192.168.1.1">
+                <button class="btn green small">Ajouter</button>
+            </form>
+            <div class="spacer"></div>
+            <table>
+                <tr><th>Adresse IP de confiance</th><th></th></tr>
+                {% for ip in whitelist %}
+                <tr>
+                    <td>{{ ip }}</td>
+                    <td style="text-align:right">
+                        <form method="POST"
+                          action="{{ url_for('list_action', which='whitelist', action='remove') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                            <input type="hidden" name="ip" value="{{ ip }}">
+                            <button class="btn small">Retirer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2" class="muted">Liste vide.</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ------------------- ADMIN MANAGEMENT ------------------- -->
+<div class="section-title">Gestion des administrateurs</div>
+<div class="card">
+    <form class="inline-form" method="POST"
+          action="{{ url_for('admin_action', action='add') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="text" name="username" placeholder="identifiant">
+        <input type="password" name="password" placeholder="mot de passe">
+        <button class="btn amber small">Créer un compte</button>
+    </form>
+    <div class="spacer"></div>
+    <table>
+        <tr><th>Administrateur</th><th></th></tr>
+        {% for a in admin_list %}
+        <tr>
+            <td>{{ a }}{% if a == admin %}
+                <span class="muted">(session active)</span>{% endif %}</td>
+            <td style="text-align:right">
+                <form method="POST"
+                      action="{{ url_for('admin_action', action='remove') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                    <input type="hidden" name="username" value="{{ a }}">
+                    <button class="btn red small">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% set active = "dashboard" %}
+{% block title %}Supervision{% endblock %}
+
+{% block body %}
+
+<div class="grid grid-2" style="margin-bottom:22px">
+    <div>
+        <div class="section-title">État de la capture</div>
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+            <span id="capture-pill" class="pill off">arrêtée</span>
+            <div style="display:flex;gap:8px">
+                <form method="POST" action="{{ url_for('capture', action='start') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                    <button class="btn green small">Démarrer</button>
+                </form>
+                <form method="POST" action="{{ url_for('capture', action='stop') }}">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+                    <button class="btn red small">Arrêter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="section-title">Niveau de menace</div>
+        <div class="card grid grid-2" style="gap:10px">
+            <div class="stat"><div class="label">Alertes critiques</div>
+                <div class="value red" id="c-critical">0</div></div>
+            <div class="stat"><div class="label">Avertissements</div>
+                <div class="value amber" id="c-warning">0</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="section-title">Statistiques du trafic</div>
+<div class="grid grid-4" style="margin-bottom:22px">
+    <div class="card stat"><div class="label">Paquets capturés</div>
+        <div class="value amber" id="s-packets">0</div></div>
+    <div class="card stat"><div class="label">IP uniques</div>
+        <div class="value blue" id="s-ips">0</div></div>
+    <div class="card stat"><div class="label">Entrées ARP</div>
+        <div class="value green" id="s-arp">0</div></div>
+    <div class="card stat"><div class="label">Protocoles</div>
+        <div class="value" id="s-proto">0</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:22px">
+    <div>
+        <div class="section-title">Hôtes les plus actifs</div>
+        <div class="card"><div id="talkers" class="muted">En attente de données…</div></div>
+    </div>
+    <div>
+        <div class="section-title">Répartition par protocole</div>
+        <div class="card"><div id="protos" class="muted">En attente de données…</div></div>
+    </div>
+</div>
+
+<div class="section-title">Journal des évènements</div>
+<div class="card">
+    <div class="events" id="events">
+        <div class="muted">En attente de données…</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+<script>
+const REFRESH = {{ refresh }} * 1000;
+
+function esc(s) {
+    return String(s).replace(/[&<>]/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
+
+async function update() {
+    try {
+        const res = await fetch("{{ url_for('api_stats') }}");
+        const data = await res.json();
+        const s = data.stats;
+
+        // capture status pill
+        const pill = document.getElementById('capture-pill');
+        if (s.running) { pill.className = 'pill on'; pill.textContent = 'active'; }
+        else { pill.className = 'pill off'; pill.textContent = 'arrêtée'; }
+
+        // stat cards
+        document.getElementById('s-packets').textContent = s.total_packets;
+        document.getElementById('s-ips').textContent     = s.unique_ips;
+        document.getElementById('s-arp').textContent     = s.arp_entries;
+        document.getElementById('s-proto').textContent   =
+            Object.keys(s.protocols).length;
+        document.getElementById('c-critical').textContent = data.counts.critical;
+        document.getElementById('c-warning').textContent  = data.counts.warning;
+
+        // top talkers as proportional bars
+        const maxT = s.top_talkers.length ? s.top_talkers[0][1] : 1;
+        document.getElementById('talkers').innerHTML =
+            s.top_talkers.length
+            ? s.top_talkers.map(([ip, n]) => `
+                <div class="bar-row">
+                  <span style="width:130px">${esc(ip)}</span>
+                  <span class="bar-track">
+                    <span class="bar-fill" style="width:${100*n/maxT}%"></span>
+                  </span>
+                  <span style="width:50px;text-align:right">${n}</span>
+                </div>`).join('')
+            : '<span class="muted">Aucun trafic IP capturé.</span>';
+
+        // protocol breakdown
+        const protos = Object.entries(s.protocols);
+        document.getElementById('protos').innerHTML =
+            protos.length
+            ? protos.map(([p, n]) =>
+                `<div class="bar-row"><span style="width:130px">proto ${esc(p)}</span>
+                 <span style="color:var(--amber)">${n}</span></div>`).join('')
+            : '<span class="muted">Aucune donnée.</span>';
+
+        // event log
+        document.getElementById('events').innerHTML =
+            data.events.length
+            ? data.events.map(e => `
+                <div class="event ${e.severity}">
+                  <span class="time">${esc(e.time)}</span>
+                  <span class="cat">${esc(e.category)}</span>
+                  <span>${esc(e.message)}</span>
+                </div>`).join('')
+            : '<span class="muted">Aucun évènement.</span>';
+    } catch (err) {
+        console.error('update failed', err);
+    }
+}
+
+update();
+setInterval(update, REFRESH);
+</script>
+{% endblock %}

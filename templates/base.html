@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCP — {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="topbar">
+    <div class="brand">NET<span class="dot">·</span>CONTROL</div>
+    <div class="nav">
+        <a href="{{ url_for('dashboard') }}"
+           class="{{ 'active' if active=='dashboard' }}">Supervision</a>
+        <a href="{{ url_for('control') }}"
+           class="{{ 'active' if active=='control' }}">Contrôle</a>
+        <span class="user">// {{ admin }}</span>
+        <form method="POST" action="{{ url_for('logout') }}" style="display:inline">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <button type="submit" class="btn small">Déconnexion</button>
+        </form>
+    </div>
+</div>
+<div class="wrap">
+    {% with messages = get_flashed_messages() %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endwith %}
+    {% block body %}{% endblock %}
+</div>
+</body>
+</html>

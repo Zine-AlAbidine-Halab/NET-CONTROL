@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCP — Authentification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="login-screen">
+    <div class="login-box">
+        <h1>NET<span style="color:var(--amber)">·</span>CONTROL</h1>
+        <p class="sub">Panneau de supervision et de contrôle réseau</p>
+
+        {% with messages = get_flashed_messages() %}
+          {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+                <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label>Identifiant</label>
+            <input type="text" name="username" autofocus required>
+            <label>Mot de passe</label>
+            <input type="password" name="password" required>
+            <button class="btn amber" type="submit">S'authentifier</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
